@@ -14,7 +14,7 @@ import { Image } from "@/components/ui/image";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Gallery } from "@/components/ui/gallery";
-import { XCircle } from "lucide-react";
+import { XIcon } from "lucide-react";
 import { request } from "@/utils";
 
 const EditOrderItemDialog = ({
@@ -75,7 +75,7 @@ const EditOrderItemDialog = ({
                   setOrderList([]);
                 }}
               >
-                <XCircle />
+                <XIcon />
               </Button>
             )}
           </div>
@@ -85,7 +85,7 @@ const EditOrderItemDialog = ({
             <div key={item.id} className="flex flex-col gap-2 items-center">
               <Image
                 src={item.previewPic || ""}
-                className="w-full h-32 rounded-md bg-gray-200"
+                className="w-full h-32 rounded-md bg-gray-200 object-cover"
               />
               <Button
                 variant="outline"

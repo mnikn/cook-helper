@@ -15,7 +15,7 @@ import EditOrderItemDialog from "@/components/EditOrderItemDialog";
 import PreviewOrderDialog from "@/components/PreviewOrderDialog";
 import { Image } from "@/components/ui/image";
 import { request } from "@/utils";
-import { Loader2 } from "lucide-react";
+import { Loader } from "lucide-react";
 import AppContext from "./context";
 import {
   AlertDialog,
@@ -240,7 +240,7 @@ function Home() {
 
             {orderListLoading && (
               <div className="flex justify-center items-center">
-                <Loader2 className="animate-spin" />
+                <Loader className="animate-spin" />
               </div>
             )}
             {!orderListLoading && (
@@ -341,7 +341,7 @@ function Home() {
                     setGalleryCurrentItem(item);
                   }}
                 >
-                  {item}
+                  {cookTable.find((item2) => item2.id === item)?.name || item}
                 </Button>
               );
             })}
