@@ -10,6 +10,8 @@
 !.yarn/releases
 !.yarn/versions
 
+src/data/db.json
+
 # testing
 /coverage
 
