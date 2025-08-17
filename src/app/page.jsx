@@ -15,7 +15,7 @@ import EditOrderItemDialog from "@/components/EditOrderItemDialog";
 import PreviewOrderDialog from "@/components/PreviewOrderDialog";
 import { Image } from "@/components/ui/image";
 import { request } from "@/utils";
-import { Loader } from "lucide-react";
+import { Loader, ChefHat, Calendar, Clock } from "lucide-react";
 import AppContext from "./context";
 import {
   AlertDialog,
@@ -45,26 +45,31 @@ const OrderList = ({
     const cookData = getCookData(id);
     return (
       <div className="flex flex-col gap-2 shrink-0 items-center">
-        <Image
-          src={cookData?.previewPic}
-          className="size-16 object-cover rounded-md bg-gray-200"
-        />
-        <div className="text-gray-800 font-medium">{cookData?.name}</div>
+        <div className="relative overflow-hidden rounded-lg shadow-sm">
+          <Image
+            src={cookData?.previewPic}
+            className="size-16 object-cover bg-blue-50"
+          />
+        </div>
+        <div className="text-gray-600 font-medium text-sm text-center max-w-16 truncate">
+          {cookData?.name}
+        </div>
       </div>
     );
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       {orderList.map((item, index) => (
-        <div key={index} className="flex flex-col">
+        <div key={index} className="flex flex-col slide-up" style={{ animationDelay: `${index * 0.05}s` }}>
           {!dayjs(item.time).isSame(dayjs(), "day") && (
-            <div className="text-gray-800 font-medium px-4 max-md:px-0">
+            <div className="text-gray-500 font-medium px-4 max-md:px-0 mb-2 flex items-center gap-2">
+              <Calendar className="size-4 text-blue-400" />
               {dayjs(item.time).format("MM-DD")}
             </div>
           )}
           <div className="flex max-md:flex-col">
-            <div className="flex flex-1 flex-wrap gap-2 rounded-md hover:cursor-pointer hover:bg-gray-100 items-center px-4 py-2 max-md:px-0">
+            <div className="flex flex-1 flex-wrap gap-3 rounded-lg hover:cursor-pointer hover:bg-blue-50/50 items-center px-4 py-3 max-md:px-0 transition-colors duration-200">
               <div className="flex gap-4 overflow-x-auto pb-2">
                 {item?.items?.map((item) => (
                   <OrderItem id={item} key={item} />
@@ -72,20 +77,36 @@ const OrderList = ({
               </div>
             </div>
             <div className="md:ml-auto flex gap-2 h-fit my-auto">
-              <Button variant="outline" onClick={() => onPreviewClick(item)}>
+              <Button 
+                variant="outline" 
+                onClick={() => onPreviewClick(item)}
+                className="button-hover border-blue-200 text-blue-600 hover:bg-blue-50"
+              >
                 看点做
               </Button>
               {!dayjs(item.time).isBefore(dayjs(), "day") && (
-                <Button variant="outline" onClick={() => onEditClick(item)}>
+                <Button 
+                  variant="outline" 
+                  onClick={() => onEditClick(item)}
+                  className="button-hover border-green-200 text-green-600 hover:bg-green-50"
+                >
                   编辑
                 </Button>
               )}
               {dayjs(item.time).isBefore(dayjs(), "day") && (
-                <Button variant="outline" onClick={() => onCloneClick(item)}>
+                <Button 
+                  variant="outline" 
+                  onClick={() => onCloneClick(item)}
+                  className="button-hover border-purple-200 text-purple-600 hover:bg-purple-50"
+                >
                   克隆
                 </Button>
               )}
-              <Button variant="destructive" onClick={() => onDeleteClick(item)}>
+              <Button 
+                variant="destructive" 
+                onClick={() => onDeleteClick(item)}
+                className="button-hover"
+              >
                 删除
               </Button>
             </div>
@@ -227,38 +248,53 @@ function Home() {
     <AppContext.Provider
       value={{ cookTable, showAlertDialog, loadingCookTable }}
     >
-      <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="min-h-screen py-8 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col gap-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setEditCookTable(true);
-              }}
-            >
-              编辑菜谱
-            </Button>
-            <Button
-              variant="outline"
-              className="text-black"
-              onClick={() => {
-                setEditOrderItem({});
-              }}
-            >
-              点菜！
-            </Button>
+          <div className="flex flex-col gap-6 fade-in">
+            {/* 头部操作区域 */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setEditCookTable(true);
+                }}
+                className="button-hover border-blue-200 text-blue-600 hover:bg-blue-50 flex items-center gap-2"
+              >
+                <ChefHat className="size-4" />
+                编辑菜谱
+              </Button>
+              <Button
+                variant="default"
+                className="button-hover bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
+                onClick={() => {
+                  setEditOrderItem({});
+                }}
+              >
+                <ChefHat className="size-4" />
+                点菜！
+              </Button>
+            </div>
 
             {orderListLoading && (
-              <div className="flex justify-center items-center">
-                <Loader className="animate-spin" />
+              <div className="flex justify-center items-center py-12">
+                <div className="flex flex-col items-center gap-4">
+                  <Loader className="animate-spin text-blue-500 size-8" />
+                  <p className="text-gray-500">加载中...</p>
+                </div>
               </div>
             )}
             {!orderListLoading && (
-              <div className="flex flex-col gap-4">
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <h2 className="text-xl font-bold text-gray-800 mb-4">
-                    今天恰的东西：
-                  </h2>
+              <div className="flex flex-col gap-6">
+                {/* 今日菜单 */}
+                <div className="glass-effect rounded-xl shadow-sm p-6 card-hover">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-blue-500 rounded-lg">
+                      <Clock className="size-5 text-white" />
+                    </div>
+                    <h2 className="text-xl font-bold text-blue-600">
+                      今天恰的东西：
+                    </h2>
+                  </div>
                   <div className="flex flex-col">
                     <OrderList
                       orderList={todayOrderList}
@@ -270,10 +306,16 @@ function Home() {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <h2 className="text-xl font-bold text-gray-800 mb-4">
-                    之前恰的东西：
-                  </h2>
+                {/* 历史菜单 */}
+                <div className="glass-effect rounded-xl shadow-sm p-6 card-hover">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-gray-500 rounded-lg">
+                      <Calendar className="size-5 text-white" />
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-600">
+                      之前恰的东西：
+                    </h2>
+                  </div>
                   <div className="flex flex-col">
                     <OrderList
                       orderList={beforeOrderList}
@@ -308,7 +350,7 @@ function Home() {
           }
         }}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="glass-effect">
           <AlertDialogHeader>
             <AlertDialogTitle>{alertDialogTitle}</AlertDialogTitle>
           </AlertDialogHeader>
@@ -344,8 +386,8 @@ function Home() {
                   variant="outline"
                   key={item}
                   className={cn(
-                    "shrink-0",
-                    galleryCurrentItem === item && "bg-gray-200"
+                    "shrink-0 button-hover",
+                    galleryCurrentItem === item && "bg-blue-100 border-blue-300 text-blue-700"
                   )}
                   onClick={() => {
                     setGalleryCurrentItem(item);
