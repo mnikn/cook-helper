@@ -1,4 +1,5 @@
 module.exports = {
+  swcMinify: false,
   // 确保兼容 Node.js 16
   experimental: {
     // 禁用需要更新 Node.js 版本的功能
