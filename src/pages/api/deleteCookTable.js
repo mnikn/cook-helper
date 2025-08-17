@@ -13,17 +13,12 @@ export const config = {
 
 export default function handler(req, res) {
   const reqData = req.body;
-  const { item } = JSON.parse(reqData);
+  const { id } = JSON.parse(reqData);
 
   const dbPath = path.join(process.cwd(), "src", "data", "db.json");
   const fileContent = fs.readFileSync(dbPath, "utf-8");
   const jsonData = JSON.parse(fileContent);
-  for (let i = 0; i < jsonData.cookTable.length; i++) {
-    if (jsonData.cookTable[i].id === item.id) {
-      jsonData.cookTable[i] = item;
-      break;
-    }
-  }
+  jsonData.cookTable = jsonData.cookTable.filter(item => item.id !== id);
   fs.writeFileSync(dbPath, JSON.stringify(jsonData, null, 2));
 
   res.status(200).json({

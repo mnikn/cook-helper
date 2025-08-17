@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Gallery } from "@/components/ui/gallery";
 import { XIcon } from "lucide-react";
 import { request } from "@/utils";
+import dayjs from "dayjs";
 
 const EditOrderItemDialog = ({
   open,
@@ -43,6 +44,7 @@ const EditOrderItemDialog = ({
         order: {
           id: order?.id,
           items: orderList,
+          time: order.time ? order.time : dayjs().format("YYYY-MM-DD"),
         },
       },
       {

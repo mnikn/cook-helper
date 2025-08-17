@@ -18,12 +18,7 @@ export default function handler(req, res) {
   const dbPath = path.join(process.cwd(), "src", "data", "db.json");
   const fileContent = fs.readFileSync(dbPath, "utf-8");
   const jsonData = JSON.parse(fileContent);
-  for (let i = 0; i < jsonData.cookTable.length; i++) {
-    if (jsonData.cookTable[i].id === item.id) {
-      jsonData.cookTable[i] = item;
-      break;
-    }
-  }
+  jsonData.cookTable.push({ ...item, id: uuidv4() });
   fs.writeFileSync(dbPath, JSON.stringify(jsonData, null, 2));
 
   res.status(200).json({

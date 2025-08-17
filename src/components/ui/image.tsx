@@ -5,6 +5,7 @@ import {
   DialogOverlay,
   DialogPortal,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   previewClassName?: string;
@@ -27,12 +28,15 @@ export const Image: React.FC<ImageProps> = ({
 
   return (
     <>
-      <img
-        className={className}
-        style={{ cursor: "pointer" }}
-        onClick={handleClick}
-        {...props}
-      />
+      {props.src && (
+        <img
+          className={className}
+          style={{ cursor: "pointer" }}
+          onClick={handleClick}
+          {...props}
+        />
+      )}
+      {!props.src && <div className={cn(className, "flex items-center justify-center text-sm text-gray-500")}>暂无图片</div>}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogPortal>
           <DialogOverlay className="bg-black/70 fixed inset-0 z-50" />

@@ -12,8 +12,7 @@ export default function handler(req, res) {
   const jsonData = JSON.parse(fileContent);
   jsonData.orderList.push({
     ...order,
-    id: uuidv4(),
-    time: dayjs().format("YYYY-MM-DD"),
+    id: uuidv4()
   });
   fs.writeFileSync(dbPath, JSON.stringify(jsonData, null, 2));
 

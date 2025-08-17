@@ -12,12 +12,11 @@ import { v4 as uuidv4 } from "uuid";
 import AppContext from "@/app/context";
 import { useContext, useState, useEffect } from "react";
 import { Image } from "@/components/ui/image";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Gallery } from "@/components/ui/gallery";
 import { XCircle } from "lucide-react";
 import { request } from "@/utils";
 import { Input } from "./ui/input";
+import { Loader } from "lucide-react";
 
 const EditCookItemDialog = ({ open, onClose, onSubmit, item }) => {
   const [name, setName] = useState(item?.name);
@@ -49,6 +48,7 @@ const EditCookItemDialog = ({ open, onClose, onSubmit, item }) => {
 
   const handleSubmit = () => {
     onSubmit({
+      ...item,
       name,
       previewPic,
       cookPics,
@@ -69,8 +69,8 @@ const EditCookItemDialog = ({ open, onClose, onSubmit, item }) => {
           <DialogTitle>编辑菜谱</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-2">
-          <div className="flex gap-5 items-center">
-            <div className="w-18">菜名：</div>
+          <div className="flex gap-4 items-center">
+            <div className="w-18 shrink-0">菜名：</div>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -78,7 +78,7 @@ const EditCookItemDialog = ({ open, onClose, onSubmit, item }) => {
             />
           </div>
           <div className="flex gap-0 items-center mt-2">
-            <div className="w-18">预览图：</div>
+            <div className="w-18 shrink-0">预览图：</div>
             <Image
               src={previewPic}
               alt=""
@@ -98,7 +98,11 @@ const EditCookItemDialog = ({ open, onClose, onSubmit, item }) => {
           </div>
           <div className="flex gap-0 items-center mt-2">
             <div className="w-18 shrink-0">做法：</div>
-            <div className={`flex gap-2 overflow-x-auto ${cookPics?.length > 0 ? "mr-4" : ""}`}>
+            <div
+              className={`flex gap-2 overflow-x-auto ${
+                cookPics?.length > 0 ? "mr-4" : ""
+              }`}
+            >
               {cookPics?.map((item) => (
                 <div className="relative shrink-0">
                   <Image
@@ -139,89 +143,116 @@ const EditCookItemDialog = ({ open, onClose, onSubmit, item }) => {
 };
 
 const EditCookTableDialog = ({ open, onClose, onSubmit }) => {
-  const { cookTable } = useContext(AppContext);
+  const { cookTable, showAlertDialog, loadingCookTable } =
+    useContext(AppContext);
 
-  const [finalCookTable, setFinalCookTable] = useState([]);
   const [editCookItem, setEditCookItem] = useState(null);
 
-  useEffect(() => {
-    setFinalCookTable(cookTable);
-  }, [cookTable]);
-
-  const handleSubmit = () => {
-    request(
-      "/api/updateCookTable",
-      {
-        cookTable: finalCookTable,
-      },
-      {
-        method: "POST",
-      }
-    ).then(() => {
-      onSubmit();
-      onClose();
-    });
-  };
+  // const handleSubmit = () => {
+  //   request(
+  //     "/api/updateCookTable",
+  //     {
+  //       cookTable: finalCookTable,
+  //     },
+  //     {
+  //       method: "POST",
+  //     }
+  //   ).then(() => {
+  //     onSubmit();
+  //     onClose();
+  //   });
+  // };
 
   const handleAddItem = () => {
     setEditCookItem({
-      name: "新菜" + (finalCookTable.length + 1),
+      name: "新菜" + (cookTable.length + 1),
       previewPic: "",
       cookPics: [],
     });
   };
 
   return (
-    <Dialog open={open}>
+    <Dialog
+      open={open}
+      onOpenChange={(val) => {
+        if (!val) {
+          onClose();
+        }
+      }}
+    >
       <DialogContent
-        showCloseButton={false}
+        showCloseButton={true}
         className="max-w-[800px] h-[90vh] max-md:max-w-[80vw] px-0 flex flex-col"
       >
         <DialogHeader className="px-4">
           <DialogTitle>编辑菜谱</DialogTitle>
-          <Button variant="outline" className="mt-2" onClick={handleSubmit}>
-            保存！
-          </Button>
           <Button variant="outline" onClick={handleAddItem}>
             加新菜！
           </Button>
         </DialogHeader>
-        <div className="grid max-md:grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto px-4 flex-1">
-          {finalCookTable.map((item) => (
-            <div key={item.id} className="flex flex-col gap-2 items-center">
-              <Image
-                src={item.previewPic || ""}
-                className="w-full h-32 rounded-md bg-gray-200 object-cover"
-              />
-              <div className="flex flex-col gap-2 items-center w-full">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => {
-                    setEditCookItem(item);
-                  }}
-                >
-                  编辑
-                </Button>
-                <Button
-                  variant="destructive"
-                  className="w-full"
-                  onClick={() => {
-                    setFinalCookTable(
-                      finalCookTable.filter((item2) => item2.id !== item.id)
-                    );
-                  }}
-                >
-                  删除
-                </Button>
-              </div>
-              <div className="flex gap-2 items-center">
-                <div className="text-gray-800">{item?.name}</div>
-              </div>
+        <div className="relative flex-1 overflow-y-auto">
+          {loadingCookTable && (
+            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex justify-center items-center">
+              <Loader className="w-4 h-4 animate-spin" />
             </div>
-          ))}
+          )}
+          <div
+            className={`grid max-md:grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto px-4 flex-1 ${
+              loadingCookTable ? "opacity-50" : ""
+            }`}
+          >
+            {cookTable.map((item) => (
+              <div key={item.id} className="flex flex-col gap-2 items-center">
+                <Image
+                  src={item.previewPic || ""}
+                  className="w-full h-32 rounded-md bg-gray-200 object-cover"
+                />
+                <div className="flex flex-col gap-2 items-center w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      setEditCookItem(item);
+                    }}
+                  >
+                    编辑
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="w-full"
+                    onClick={() => {
+                      showAlertDialog({
+                        title: "删除菜谱",
+                        description: "确定要删除该菜谱吗？",
+                        onConfirm: () => {
+                          request(
+                            "/api/deleteCookTable",
+                            {
+                              id: item.id,
+                            },
+                            {
+                              method: "POST",
+                            }
+                          ).then(() => {
+                            onSubmit();
+                            setEditCookItem(null);
+                          });
+                        },
+                      });
+                    }}
+                  >
+                    删除
+                  </Button>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <div className="text-gray-800">{item?.name}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
         <EditCookItemDialog
+          item={editCookItem}
           open={!!editCookItem}
           onClose={() => {
             setEditCookItem(null);
@@ -229,13 +260,29 @@ const EditCookTableDialog = ({ open, onClose, onSubmit }) => {
           onSubmit={(item) => {
             console.log(item);
             if (item.id) {
-              setFinalCookTable(
-                finalCookTable.map((item2) =>
-                  item2.id === item.id ? item : item2
-                )
-              );
+              request(
+                "/api/updateCookTable",
+                {
+                  item,
+                },
+                {
+                  method: "POST",
+                }
+              ).then(() => {
+                onSubmit();
+              });
             } else {
-              setFinalCookTable([...finalCookTable, { ...item, id: uuidv4() }]);
+              request(
+                "/api/addCookTable",
+                {
+                  item,
+                },
+                {
+                  method: "POST",
+                }
+              ).then(() => {
+                onSubmit();
+              });
             }
             setEditCookItem(null);
           }}

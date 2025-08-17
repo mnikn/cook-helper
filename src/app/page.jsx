@@ -99,7 +99,7 @@ const OrderList = ({
 function Home() {
   const [cookTable, setCookTable] = useState([]);
   const [orderList, setOrderList] = useState([]);
-
+  const [loadingCookTable, setLoadingCookTable] = useState(true);
   const [orderListLoading, setOrderListLoading] = useState(true);
 
   const [editOrderItem, setEditOrderItem] = useState(null);
@@ -111,15 +111,23 @@ function Home() {
 
   const getOrderList = () => {
     setOrderListLoading(true);
-    request("/api/getOrderList").then((res) => {
-      setOrderList(res.data.orderList);
-      setOrderListLoading(false);
-    });
+    request("/api/getOrderList")
+      .then((res) => {
+        setOrderList(res.data.orderList);
+      })
+      .finally(() => {
+        setOrderListLoading(false);
+      });
   };
   const getCookTable = () => {
-    request("/api/getCookTable").then((res) => {
-      setCookTable(res.data.cookTable);
-    });
+    setLoadingCookTable(true);
+    request("/api/getCookTable")
+      .then((res) => {
+        setCookTable(res.data.cookTable);
+      })
+      .finally(() => {
+        setLoadingCookTable(false);
+      });
   };
 
   useEffect(() => {
@@ -216,7 +224,9 @@ function Home() {
   const [editCookTable, setEditCookTable] = useState(false);
 
   return (
-    <AppContext.Provider value={{ cookTable, showAlertDialog }}>
+    <AppContext.Provider
+      value={{ cookTable, showAlertDialog, loadingCookTable }}
+    >
       <div className="min-h-screen bg-gray-50 py-8 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col gap-2">
