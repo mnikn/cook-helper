@@ -6,7 +6,7 @@ import multer from "multer";
 const upload = multer({
   storage: multer.diskStorage({
     destination: function (req, file, cb) {
-      const uploadDir = path.join(process.cwd(), "public", "imgs");
+      const uploadDir = path.join(process.cwd(), "data", "imgs");
       // 确保目录存在
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
@@ -75,7 +75,7 @@ export default function handler(req, res) {
     return res.status(200).json({ 
       status: "success", 
       data: { 
-        path: `/imgs/${req.file.filename}`,
+        path: `/api/image/${req.file.filename}`,
         originalName: req.file.originalname,
         size: req.file.size
       } 

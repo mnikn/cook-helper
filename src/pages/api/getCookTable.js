@@ -3,7 +3,7 @@ import path from "path";
 
 export default function handler(req, res) {
   // 读取 db.json 文件内容
-  const dbPath = path.join(process.cwd(), "src", "data", "db.json");
+  const dbPath = path.join(process.cwd(), "data", "db.json");
   let cookTableData = [];
   try {
     const fileContent = fs.readFileSync(dbPath, "utf-8");
