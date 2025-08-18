@@ -36,11 +36,25 @@ const EditCookItemDialog = ({ open, onClose, onSubmit, item }) => {
     input.onchange = (e) => {
       const file = e.target.files[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          onCallback(event.target.result);
-        };
-        reader.readAsDataURL(file);
+        // const reader = new FileReader();
+        // reader.onload = (event) => {
+        //   onCallback(event.target.result);
+        // };
+        // reader.readAsDataURL(file);
+        console.log(file);
+        // 使用FormData上传文件
+        const formData = new FormData();
+        formData.append("file", file);
+
+        fetch("/api/uploadPic", {
+          method: "POST",
+          body: formData,
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            console.log(res);
+            onCallback(res.data.path);
+          });
       }
     };
     input.click();
