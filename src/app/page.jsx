@@ -51,7 +51,7 @@ const OrderList = ({
             className="size-16 object-cover bg-blue-50"
           />
         </div>
-        <div className="text-gray-600 font-medium text-sm text-center max-w-16 truncate">
+        <div className="text-gray-600 font-medium text-sm text-center">
           {cookData?.name}
         </div>
       </div>
