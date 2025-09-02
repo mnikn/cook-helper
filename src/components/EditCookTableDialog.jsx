@@ -8,23 +8,36 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { v4 as uuidv4 } from "uuid";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import AppContext from "@/app/context";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useMemo } from "react";
 import { Image } from "@/components/ui/image";
 import { Button } from "@/components/ui/button";
 import { XCircle } from "lucide-react";
 import { request } from "@/utils";
 import { Input } from "./ui/input";
 import { Loader } from "lucide-react";
+import { COOK_TYPE_MAP } from "@/app/constants";
 
 const EditCookItemDialog = ({ open, onClose, onSubmit, item }) => {
   const [name, setName] = useState(item?.name);
+  const [type, setType] = useState(item?.type || "other");
   const [previewPic, setPreviewPic] = useState(item?.previewPic);
   const [cookPics, setCookPics] = useState(item?.cookPics);
 
+  const [previewPicLoading, setPreviewPicLoading] = useState(false);
+  const [cookPicsLoading, setCookPicsLoading] = useState(false);
+
   useEffect(() => {
     setName(item?.name);
+    setType(item?.type || "other");
     setPreviewPic(item?.previewPic);
     setCookPics(item?.cookPics || []);
   }, [item]);
@@ -64,6 +77,7 @@ const EditCookItemDialog = ({ open, onClose, onSubmit, item }) => {
     onSubmit({
       ...item,
       name,
+      type,
       previewPic,
       cookPics,
     });
@@ -91,6 +105,21 @@ const EditCookItemDialog = ({ open, onClose, onSubmit, item }) => {
               placeholder="输入新的菜名"
             />
           </div>
+          <div className="flex gap-4 items-center mt-2">
+            <div className="w-18 shrink-0">类型：</div>
+            <Select onValueChange={(value) => setType(value)} value={type}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="类型" />
+              </SelectTrigger>
+              <SelectContent value={type}>
+                {Object.keys(COOK_TYPE_MAP).map((key) => (
+                  <SelectItem key={key} value={key}>
+                    {COOK_TYPE_MAP[key]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex gap-0 items-center mt-2">
             <div className="w-18 shrink-0">预览图：</div>
             <Image
@@ -102,12 +131,16 @@ const EditCookItemDialog = ({ open, onClose, onSubmit, item }) => {
               className="ml-4"
               variant="outline"
               onClick={() => {
+                setPreviewPicLoading(true);
                 selectPicFile((result) => {
+                  setPreviewPicLoading(false);
                   setPreviewPic(result);
                 });
               }}
+              disabled={previewPicLoading}
             >
               上传
+              {previewPicLoading && <Loader className="w-4 h-4 animate-spin" />}
             </Button>
           </div>
           <div className="flex gap-0 items-center mt-2">
@@ -139,12 +172,16 @@ const EditCookItemDialog = ({ open, onClose, onSubmit, item }) => {
             <Button
               variant="outline"
               onClick={() => {
+                setCookPicsLoading(true);
                 selectPicFile((result) => {
                   setCookPics([...(cookPics || []), result]);
+                  setCookPicsLoading(false);
                 });
               }}
+              disabled={cookPicsLoading}
             >
               上传
+              {cookPicsLoading && <Loader className="w-4 h-4 animate-spin" />}
             </Button>
           </div>
           <Button variant="outline" onClick={handleSubmit} className="mt-2">
@@ -161,6 +198,7 @@ const EditCookTableDialog = ({ open, onClose, onSubmit }) => {
     useContext(AppContext);
 
   const [editCookItem, setEditCookItem] = useState(null);
+  const [showType, setShowType] = useState("all");
 
   // const handleSubmit = () => {
   //   request(
@@ -185,6 +223,13 @@ const EditCookTableDialog = ({ open, onClose, onSubmit }) => {
     });
   };
 
+  const showCookTable = useMemo(() => {
+    if (showType === "all") {
+      return cookTable;
+    }
+    return cookTable.filter((item) => item.type === showType);
+  }, [cookTable, showType]);
+
   return (
     <Dialog
       open={open}
@@ -200,10 +245,31 @@ const EditCookTableDialog = ({ open, onClose, onSubmit }) => {
       >
         <DialogHeader className="px-4">
           <DialogTitle>编辑菜谱</DialogTitle>
-          <Button variant="outline" onClick={handleAddItem}>
+          <Button
+            className="btn-hover bg-blue-500 hover:bg-blue-600 text-white mt-2"
+            onClick={handleAddItem}
+          >
             加新菜！
           </Button>
         </DialogHeader>
+
+        <RadioGroup
+          className="flex flex-wrap gap-2 px-4 text-sm"
+          value={showType}
+          onValueChange={(value) => setShowType(value)}
+        >
+          <div className="flex items-center gap-1">
+            <RadioGroupItem value="all" />
+            <span>全部</span>
+          </div>
+          {Object.keys(COOK_TYPE_MAP).map((key) => (
+            <div key={key} className="flex items-center gap-1">
+              <RadioGroupItem value={key}></RadioGroupItem>
+              <span>{COOK_TYPE_MAP[key]}</span>
+            </div>
+          ))}
+        </RadioGroup>
+
         <div className="relative flex-1 overflow-y-auto">
           {loadingCookTable && (
             <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex justify-center items-center">
@@ -215,7 +281,7 @@ const EditCookTableDialog = ({ open, onClose, onSubmit }) => {
               loadingCookTable ? "opacity-50" : ""
             }`}
           >
-            {cookTable.map((item) => (
+            {showCookTable.map((item) => (
               <div key={item.id} className="flex flex-col gap-2 items-center">
                 <Image
                   src={item.previewPic || ""}

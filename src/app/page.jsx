@@ -15,7 +15,7 @@ import EditOrderItemDialog from "@/components/EditOrderItemDialog";
 import PreviewOrderDialog from "@/components/PreviewOrderDialog";
 import { Image } from "@/components/ui/image";
 import { request } from "@/utils";
-import { Loader, ChefHat, Calendar, Clock } from "lucide-react";
+import { Loader, ChefHat, Calendar, Clock, Edit } from "lucide-react";
 import AppContext from "./context";
 import {
   AlertDialog,
@@ -29,7 +29,27 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Gallery } from "@/components/ui/gallery";
 import EditCookTableDialog from "@/components/EditCookTableDialog";
+import localforage from "localforage";
 // import { v4 as uuidv4 } from 'uuid';
+
+const OrderItem = ({ id }) => {
+  const { cookTable } = useContext(AppContext);
+  const getCookData = (id) => cookTable.find((item) => item.id === id);
+  const cookData = getCookData(id);
+  return (
+    <div className="flex flex-col gap-2 shrink-0 items-center">
+      <div className="relative overflow-hidden rounded-lg shadow-sm">
+        <Image
+          src={cookData?.previewPic}
+          className="size-16 object-cover bg-blue-50"
+        />
+      </div>
+      <div className="text-gray-600 font-medium text-sm text-center">
+        {cookData?.name}
+      </div>
+    </div>
+  );
+};
 
 const OrderList = ({
   orderList,
@@ -38,30 +58,14 @@ const OrderList = ({
   onPreviewClick,
   onDeleteClick,
 }) => {
-  const { cookTable } = useContext(AppContext);
-  const getCookData = (id) => cookTable.find((item) => item.id === id);
-
-  const OrderItem = ({ id }) => {
-    const cookData = getCookData(id);
-    return (
-      <div className="flex flex-col gap-2 shrink-0 items-center">
-        <div className="relative overflow-hidden rounded-lg shadow-sm">
-          <Image
-            src={cookData?.previewPic}
-            className="size-16 object-cover bg-blue-50"
-          />
-        </div>
-        <div className="text-gray-600 font-medium text-sm text-center">
-          {cookData?.name}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="flex flex-col gap-4">
       {orderList.map((item, index) => (
-        <div key={index} className="flex flex-col slide-up" style={{ animationDelay: `${index * 0.05}s` }}>
+        <div
+          key={index}
+          className="flex flex-col slide-up"
+          style={{ animationDelay: `${index * 0.05}s` }}
+        >
           {!dayjs(item.time).isSame(dayjs(), "day") && (
             <div className="text-gray-500 font-medium px-4 max-md:px-0 mb-2 flex items-center gap-2">
               <Calendar className="size-4 text-blue-400" />
@@ -77,16 +81,16 @@ const OrderList = ({
               </div>
             </div>
             <div className="md:ml-auto flex gap-2 h-fit my-auto">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => onPreviewClick(item)}
                 className="button-hover border-blue-200 text-blue-600 hover:bg-blue-50"
               >
                 看点做
               </Button>
               {!dayjs(item.time).isBefore(dayjs(), "day") && (
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => onEditClick(item)}
                   className="button-hover border-green-200 text-green-600 hover:bg-green-50"
                 >
@@ -94,16 +98,16 @@ const OrderList = ({
                 </Button>
               )}
               {dayjs(item.time).isBefore(dayjs(), "day") && (
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => onCloneClick(item)}
                   className="button-hover border-purple-200 text-purple-600 hover:bg-purple-50"
                 >
                   克隆
                 </Button>
               )}
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="destructive"
                 onClick={() => onDeleteClick(item)}
                 className="button-hover"
               >
@@ -129,6 +133,10 @@ function Home() {
   const [galleryOrderItem, setGalleryOrderItem] = useState(null);
   const [galleryPics, setGalleryPics] = useState([]);
   const [galleryCurrentItem, setGalleryCurrentItem] = useState(null);
+
+  useEffect(() => {
+    localforage.setDriver([localforage.INDEXEDDB, localforage.WEBSQL]);
+  }, []);
 
   const getOrderList = () => {
     setOrderListLoading(true);
@@ -260,7 +268,7 @@ function Home() {
                 }}
                 className="button-hover border-blue-200 text-blue-600 hover:bg-blue-50 flex items-center gap-2"
               >
-                <ChefHat className="size-4" />
+                <Edit className="size-4" />
                 编辑菜谱
               </Button>
               <Button
@@ -387,7 +395,8 @@ function Home() {
                   key={item}
                   className={cn(
                     "shrink-0 button-hover",
-                    galleryCurrentItem === item && "bg-blue-100 border-blue-300 text-blue-700"
+                    galleryCurrentItem === item &&
+                      "bg-blue-100 border-blue-300 text-blue-700"
                   )}
                   onClick={() => {
                     setGalleryCurrentItem(item);
