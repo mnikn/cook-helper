@@ -258,12 +258,12 @@ const EditCookTableDialog = ({ open, onClose, onSubmit }) => {
           value={showType}
           onValueChange={(value) => setShowType(value)}
         >
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 cursor-pointer" onClick={() => setShowType("all")}>
             <RadioGroupItem value="all" />
             <span>全部</span>
           </div>
           {Object.keys(COOK_TYPE_MAP).map((key) => (
-            <div key={key} className="flex items-center gap-1">
+            <div key={key} className="flex items-center gap-1 cursor-pointer" onClick={() => setShowType(key)}>
               <RadioGroupItem value={key}></RadioGroupItem>
               <span>{COOK_TYPE_MAP[key]}</span>
             </div>

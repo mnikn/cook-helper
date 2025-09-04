@@ -35,7 +35,7 @@ export const Image: React.FC<ImageProps> = ({
 }) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
-  const [imgSrc, setImgSrc] = React.useState(props.src);
+  const [imgSrc, setImgSrc] = React.useState('');
 
   const handleClick = (e: React.MouseEvent) => {
     if (!props.src) {
@@ -47,7 +47,7 @@ export const Image: React.FC<ImageProps> = ({
 
   const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     setLoading(false);
-    if (!props.src?.startsWith("data:image")) {
+    if (!props.src?.startsWith("data:image") && imgSrc === '') {
       toDataURL(props.src as string, (dataURL) => {
         localforage.setItem(props.src as string, dataURL);
         setImgSrc(dataURL);
@@ -59,13 +59,14 @@ export const Image: React.FC<ImageProps> = ({
   };
 
   React.useEffect(() => {
-    setImgSrc(props.src as string);
     if (props.src?.startsWith("data:image")) {
       return;
     }
     localforage.getItem(props.src as string).then((data) => {
       if (data) {
         setImgSrc(data as string);
+      } else {
+        setImgSrc(props.src as string);
       }
     });
   }, [props.src]);

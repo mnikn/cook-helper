@@ -15,7 +15,7 @@ import { Image } from "@/components/ui/image";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Gallery } from "@/components/ui/gallery";
-import { XIcon } from "lucide-react";
+import { Loader2Icon, XIcon } from "lucide-react";
 import { request } from "@/utils";
 import dayjs from "dayjs";
 import { COOK_TYPE_MAP } from "@/app/constants";
@@ -32,6 +32,7 @@ const EditOrderItemDialog = ({
   const [orderList, setOrderList] = useState([]);
 
   const [galleryItem, setGalleryItem] = useState("");
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const showCookTable = useMemo(() => {
     if (showType === "all") {
@@ -60,6 +61,7 @@ const EditOrderItemDialog = ({
         targetOrderTime = dayjs().format("YYYY-MM-DD");
       }
     }
+    setSubmitLoading(true);
     request(
       order?.id ? "/api/updateOrder" : "/api/addOrder",
       {
@@ -74,8 +76,10 @@ const EditOrderItemDialog = ({
       }
     ).then(() => {
       onSubmit?.();
+      onOpenChange(false);
+    }).finally(() => {
+      setSubmitLoading(false);
     });
-    onOpenChange(false);
   };
 
   return (
@@ -90,8 +94,10 @@ const EditOrderItemDialog = ({
             variant="default"
             className="button-hover bg-blue-500 hover:bg-blue-600 text-white mt-2"
             onClick={handleSubmit}
+            disabled={submitLoading}
           >
-            动！
+            {submitLoading && <Loader2Icon className="animate-spin" /> }
+            {!submitLoading ? "动！" : "动更..."}
           </Button>
 
           <RadioGroup
@@ -99,12 +105,12 @@ const EditOrderItemDialog = ({
             value={showType}
             onValueChange={(value) => setShowType(value)}
           >
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 cursor-pointer" onClick={() => setShowType("all")}>
               <RadioGroupItem value="all" />
               <span>全部</span>
             </div>
             {Object.keys(COOK_TYPE_MAP).map((key) => (
-              <div key={key} className="flex items-center gap-1">
+              <div key={key} className="flex items-center gap-1 cursor-pointer" onClick={() => setShowType(key)}>
                 <RadioGroupItem value={key}></RadioGroupItem>
                 <span>{COOK_TYPE_MAP[key]}</span>
               </div>
