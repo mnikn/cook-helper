@@ -165,7 +165,7 @@ function Home() {
   }, []);
 
   const todayOrderList = useMemo(() => {
-    return orderList.filter((item) => dayjs(item.time).isSame(dayjs(), "day"));
+    return orderList.filter((item) => dayjs(item.time).isSame(dayjs(), "day") || dayjs(item.time).isAfter(dayjs(), "day"));
   }, [orderList]);
   const beforeOrderList = useMemo(() => {
     return orderList.filter((item) =>
